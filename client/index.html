@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="join('room1')">Room 1</button>
+    <button onclick="join('room2')">Room 2</button>
+    <p>last message</p>
+    <p class="data"></p>
+    <textarea name="" id="" cols="30" rows="10"></textarea>
+    <button onclick="send()">Send</button>
+
+</body>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
+<script>
+    let i = 0;
+    let room = '';
+    let socketid = '';
+    const text = document.querySelector('textarea');
+    const socket = io('http://localhost:3000');
+    socket.on('connect', () => {
+        console.log('Connected');
+    });
+    socket.on('message', (data) => {
+        if(data.room == room){
+            console.log(data);
+            document.querySelector('.data').innerText = data.msg;
+        }
+    });
+    socket.on('disconnect', () => {
+        console.log('Disconnected');
+    });
+
+    let send = () => {
+        i++;
+        socket.emit('message', room, text.value);
+        socket.emit('room', room, text.value);
+    }
+
+    let join = (roomNumber) => {
+        socket.emit('leave', room);
+        room = roomNumber;
+        socket.emit('join', room);
+    }
+
+    socket.on('roomStatus', (data) => {
+        console.log(data);
+    });
+
+    socket.on('flop', (data1, data2, data3) => {
+        console.log(data1);
+        console.log(data2);
+        console.log(data3);
+    });
+</script>
+</html>
