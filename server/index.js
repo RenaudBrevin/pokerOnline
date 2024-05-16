@@ -17,14 +17,32 @@ app.get('/', (req, res) => {
 });
 
 let deck = [];
-let deckP1 = [];
-let deckP2 = [];
-let deckTable = [];
 let colors = ['red', 'yellow', 'green', 'blue'];
 
-let bankP1 = 500;
-let bankP2 = 500;
-let bankRoll = 0;
+let table = {
+    players: [],
+    deck: [],
+    bank: 0,
+    nextBet: 50
+}
+
+let player1 = {
+    name: 'Player 1',
+    id: '',
+    deck: [],
+    bank: 500,
+    bet: 0,
+    isTurn: false
+}
+
+let player2 = {
+    name: 'Player 2',
+    id: '',
+    deck: [],
+    bank: 500,
+    bet: 0,
+    isTurn: false
+}
 
 colors.forEach(color => {
     for(let i = 0; i < 5; i++){
@@ -69,10 +87,21 @@ io.on('connection', (socket) => {
 
         if(roomClients.size === 2){
             io.to(room).emit('roomStatus', 'Start game');
-            deckP1 = [];
-            deckP2 = [];
-            deckTable = [];
-            playGame(room, id1, id2);
+            player1.id = id1;
+            player2.id = id2;
+            table.players = [player1, player2];
+
+            // Reset deck, player deck and table deck and bank players
+            table.deck = [];
+            player1.deck = [];
+            player2.deck = [];
+            table.bank = 0;
+            table.nextBet = 50;
+            player1.bank = 500;
+            player2.bank = 500;
+
+
+            showFlop(room);
         } else {
             io.to(room).emit('roomStatus', 'waiting for player');
         }
@@ -83,37 +112,74 @@ io.on('connection', (socket) => {
         io.to(room).emit('leave', room);
     });
 
-    socket.on('fold', (room, id) => {
-        console.log('Player ' + currentPlayer + ' fold');
-    });
-    
-    socket.on('bet', (room, id, bet) => {
-        console.log('Player ' + currentPlayer + ' bet ' + bet);
-    });
-    
 
 
-    let currentPlayer = ''; // 1 pour joueur 1, 2 pour joueur 2
 
-    function playGame(room, id1, id2){
-        // Show flop and user card
-        showFlop(room, id1, id2);
+    // Play turn
+    socket.on('playerAction', (room, userId, action) => {
+        // Get user by ID
+        let user = userId === player1.id ? player1 : player2;
+        let otherPlayer = table.players.find(player => player.id !== user.id);
+        let bet = table.nextBet;
+        if(user.isTurn){
+            if(action === 'bet'){
+                user.bank -= bet;
+                table.bank += bet;
 
-        currentPlayer = id1;
-        console.log(id1, id2, currentPlayer);
-        socket.on('playerAction', (room, id, action, price) => {
-            console.log(id);
-            console.log(currentPlayer);
-            if(id == currentPlayer){
-                console.log('Player ' + currentPlayer + ' ' + action);
-            } else {
-                console.log('Not your turn');
+                user.bet = bet;
+
+                table.nextBet = bet + 50;
+
+                changeturn(user, otherPlayer);
+
+                io.to(room).emit('acceptAction', user.id, action, table);
+                io.to(otherPlayer.id).emit('noCheck');
+
+                console.log('bet')
+            } else if(action === 'fold'){
+                otherPlayer.bank += table.bank;
+                table.bank = 0;
+
+                changeturn(user, otherPlayer);
+
+                io.to(room).emit('acceptAction', user.id, action, table);
+
+                console.log('fold')
+            } else if(action === 'check'){
+                user.bet = -1;
+                
+                changeturn(user, otherPlayer);
+                
+                io.to(room).emit('acceptAction', user.id, action, table);
+
+                console.log('check')
+
+                if(user.bet === otherPlayer.bet){
+                    nextCard(room);
+                }
+
+            } else if(action === 'call'){
+                user.bank -= otherPlayer.bet;
+                table.bank += otherPlayer.bet;
+
+                changeturn(user, otherPlayer);
+
+                io.to(room).emit('acceptAction', user.id, action, table);
+                
+                console.log('call')
+
+                nextCard(room);
             }
-        });
-    }
-
-
+        } else {
+            console.log('Not your turn ' + user.isTurn + otherPlayer.isTurn);
+        }
+    });
 })
+
+function changeturn(player, otherPlayer){
+    player.isTurn = false;
+    otherPlayer.isTurn = true;
+}
 
 
 server.listen(PORT, () => {
@@ -132,16 +198,23 @@ function showFlop(room){
     let card = "";
     
     card = deck.shift();
-    deckP1.push(card);
+    player1.deck.push(card);
 
     card = deck.shift();
-    deckP2.push(card);
+    player2.deck.push(card);
 
     for(let i = 0; i < 3; i++){
         card = deck.shift();
-        deckTable.push(card);
+        table.deck.push(card);
     }
 
-    io.to(id1).emit('flop', deckP1[0], deckTable);
-    io.to(id2).emit('flop', deckP2[0], deckTable);
+    player1.isTurn = true;
+
+    io.to(id1).emit('flop', player1.deck[0], table);
+    io.to(id2).emit('flop', player2.deck[0], table);
 };
+
+
+function nextCard(room){
+    console.log('next card');
+}
