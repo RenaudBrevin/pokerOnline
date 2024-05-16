@@ -1,0 +1,32 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+
+}
+
+.containerCard {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 32px;
+}
+
+.containerCard > div{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    width: fit-content;
+    height: 200px;
+}
+
+.card{
+    width: 100px;
+    height: 200px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+}

@@ -3,123 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
     <title>Document</title>
 </head>
 <body>
     <button onclick="join('room1')">Room 1</button>
     <button onclick="join('room2')">Room 2</button>
-    <p>last message</p>
-    <p class="data"></p>
-    <textarea name="" id="" cols="30" rows="10"></textarea>
-    <button onclick="send()">Send</button>
 
-    <div class="card"></div>
-
-
-    <div class="card">
-        <div class="card-face back">
-            <div class="card-content">
-            </div>
+    <div>
+        <div class="opponent">
+            <span class="name"></span>
+            <span class="bankRoll"></span>
         </div>
+        <div class="table">
+            <div class="conatinercard"></div>
+            <span class="bankRoll"></span>
+        </div>
+        <div class="containerCard">
+            <div class="flop"></div>
+            <div class="turn"></div>
+            <div class="river"></div>
+        </div>
+        <div class="player">
+            <div class="card playerCard"></div>
+            <span class="name"></span>
+            <span class="bankRoll"></span>
+        </div>
+        <span class="nextBet">Next bet : 50</span>
     </div>
 
-    <div class="card">
-        <div class="card-face front">
-            <div class="card-content">
-                <h1>1R</h1>
-            </div>
-        </div>
-    </div>
-    <button onclick="fold()" class="choiceButton">Fold</button>
-    <button onclick="bet()" class="choiceButton">Bet</button>
+    
+
+    <button onclick="fold()" id="foldButton" class="choiceButton">Fold</button>
+    <button onclick="bet()" id="betButton" class="choiceButton">Bet</button>
+    <button onclick="check()" id="checkButton" class="choiceButton">Check</button>
+    <button onclick="call()" id="callButton" class="choiceButton">Call</button>
 
 </body>
+<script src="https://cdn.jsdelivr.net/npm/pokersolver@2.1.4/pokersolver.min.js"></script>
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
-<script>
-    let i = 0;
-    let room = '';
-    let socketid = '';
-    let userId = '';
-    const text = document.querySelector('textarea');
-    const socket = io('http://localhost:3000');
-
-    socket.on('connect', () => {
-        console.log('Connected');
-    });
-
-    socket.on('socketID', (id) => {
-        console.log('Socket ID:', id);
-        userId = id;
-    });
-
-    socket.on('message', (data) => {
-        if(data.room == room){
-            console.log(data);
-            document.querySelector('.data').innerText = data.msg;
-        }
-    });
-    socket.on('disconnect', () => {
-        console.log('Disconnected');
-    });
-
-    let send = () => {
-        i++;
-        socket.emit('message', room, text.value);
-        socket.emit('room', room, text.value);
-    }
-
-    let join = (roomNumber) => {
-        socket.emit('leave', room);
-        room = roomNumber;
-        socket.emit('join', room);
-    }
-
-    socket.on('roomStatus', (data) => {
-        console.log(data);
-    });
-
-    socket.on('flop', (userDeck, flop) => {
-        console.log(userDeck);
-        console.log(flop);
-
-        let myCard = document.querySelector('.card');
-        myCard.innerHTML = userDeck.number;
-        myCard.style.background = userDeck.color;
-    });
-
-    socket.on('choiceFlop', (data) => {
-        console.log(data);
-        document.querySelectorAll('.choiceButton').forEach(button => {
-            button.disabled = false;
-        });
-    });
-
-
-    let currentPlayer = 0; // 0 pour attendre, 1 pour joueur 1, 2 pour joueur 2
-
-socket.on('turn', (message) => {
-    console.log(message);
-    document.querySelector('.data').innerText = message;
-    if (currentPlayer === 0) {
-        document.querySelectorAll('.choiceButton').forEach(button => {
-            button.disabled = true;
-        });
-    } else if (currentPlayer === 1) {
-        document.querySelectorAll('.choiceButton').forEach(button => {
-            button.disabled = false;
-        });
-    }
-});
-
-
-let fold = () => {
-    socket.emit('playerAction', room, userId, 'fold', 0);
-};
-
-let bet = () => {
-    console.log(userId);
-    socket.emit('playerAction', room, userId, 'bet', 100);
-};
-
-</script>
+<script src="script.js"></script>
 </html>

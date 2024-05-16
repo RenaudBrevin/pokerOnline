@@ -17,13 +17,15 @@ app.get('/', (req, res) => {
 });
 
 let deck = [];
-let colors = ['red', 'yellow', 'green', 'blue'];
+let colors = ['C', 'D', 'H', 'S'];
 
 let table = {
     players: [],
     deck: [],
     bank: 0,
-    nextBet: 50
+    nextBet: 50,
+    actualBet: 0,
+    actualTurn: 'preFlop'
 }
 
 let player1 = {
@@ -45,8 +47,16 @@ let player2 = {
 }
 
 colors.forEach(color => {
-    for(let i = 0; i < 5; i++){
-        deck.push({color, number: i});
+    for(let i = 1; i < 14; i++){
+        let j = i;
+        let index = 0;
+        if(i > 10){
+            index = i - 11;
+            j = ['J', 'Q', 'K'][index];
+        } else if(i === 1){
+            j = 'A';
+        }
+        deck.push({color, number: j});
     }
 })
 
@@ -154,6 +164,7 @@ io.on('connection', (socket) => {
 
                 console.log('check')
 
+                console.log(user.bet + ' ' + otherPlayer.bet)
                 if(user.bet === otherPlayer.bet){
                     nextCard(room);
                 }
@@ -194,6 +205,8 @@ function showFlop(room){
     const id1 = clients[0];
     const id2 = clients[1];
 
+    table.actualTurn = 'Flop';
+
     deck = deck.sort(() => Math.random() - 0.5);
     let card = "";
     
@@ -216,5 +229,26 @@ function showFlop(room){
 
 
 function nextCard(room){
-    console.log('next card');
+    //Reset bet
+    table.players.forEach(player => {
+        player.bet = 0;
+    });
+    table.actualBet = 0;
+    table.nextBet = 50;
+    
+
+    if(table.actualTurn === 'Flop'){
+        table.actualTurn = 'Turn';
+        let card = deck.shift();
+        table.deck.push(card);
+        io.to(room).emit('turn', table);
+    } else if(table.actualTurn === 'Turn'){
+        table.actualTurn = 'River';
+        let card = deck.shift();
+        table.deck.push(card);
+        io.to(room).emit('river', table);
+    } else if(table.actualTurn === 'River'){
+        table.actualTurn = 'Showdown';
+        io.to(room).emit('showdown', table);
+    }
 }
