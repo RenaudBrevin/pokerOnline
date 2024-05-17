@@ -139,6 +139,14 @@ io.on('connection', (socket) => {
         let bet = table.nextBet;
         if(user.isTurn){
             if(action === 'bet'){
+                if (user.bank <= 0) {
+                    io.to(user.id).emit('noBet');
+                    return;
+                } else if(user.bank < bet){
+                    bet = user.bank;
+                    io.to(user.id).emit('acceptAction', user.id, action, table);
+                } 
+
                 user.bank -= bet;
                 table.bank += bet;
 
