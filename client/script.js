@@ -3,7 +3,7 @@ let room = '';
 let socketid = '';
 let userId = '';
 const text = document.querySelector('textarea');
-const socket = io('http://localhost:3000');
+const socket = io('https://pokeronline-2.onrender.com');
 
 socket.on('connect', () => {
     console.log('Connected');
