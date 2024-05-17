@@ -40,23 +40,38 @@ socket.on('roomStatus', (data) => {
     console.log(data);
 });
 
-socket.on('flop', (userDeck, table) => {
+socket.on('preFlop', (userDeck, table) => {
+    updateInfo(table);
+
+    let playerContainer = document.querySelector('.cardPlayerContainer');
+
+    console.log(playerContainer);
+
+    let cardIndex = 0;
+    for (let i = 0; i < 2; i++) {
+        let myCard = document.createElement('div');
+        myCard.classList.add('card', 'cardPlayer');
+        
+        playerContainer.appendChild(myCard);
+
+        myCard.innerHTML = userDeck[cardIndex].number;
+        myCard.classList.add(userDeck[cardIndex].color);
+        cardIndex++;
+    }
+})
+
+
+socket.on('flop', (table) => {
     let flop = table.deck;
-    console.log(userDeck);
-    console.log(table.deck);
 
     updateInfo(table);
 
-    let myCard = document.querySelector('.card');
-    myCard.innerHTML = userDeck.number + userDeck.color;
-    myCard.style.background = userDeck.color;
 
     let flopContainer = document.querySelector('.containerCard .flop')
     for(let i = 0; i < flop.length; i++){
         let card = document.createElement('div');
-        card.innerHTML = flop[i].number + flop[i].color;
-        card.classList.add('card');
-        card.style.background = flop[i].color;
+        card.innerHTML = flop[i].number;
+        card.classList.add('card', flop[i].color);
         flopContainer.appendChild(card);
     }
 });
@@ -68,9 +83,8 @@ socket.on('turn', (table) => {
 
     let turnContainer = document.querySelector('.containerCard .turn')
     let card = document.createElement('div');
-    card.innerHTML = turn.number + turn.color;
-    card.classList.add('card');
-    card.style.background = turn.color;
+    card.innerHTML = turn.number;
+    card.classList.add('card', turn.color);
     turnContainer.appendChild(card);
 });
 
@@ -81,48 +95,14 @@ socket.on('river', (table) => {
 
     let riverContainer = document.querySelector('.containerCard .river')
     let card = document.createElement('div');
-    card.innerHTML = river.number + river.color;
-    card.classList.add('card');
-    card.style.background = river.color;
+    card.innerHTML = river.number;
+    card.classList.add('card', river.color);
     riverContainer.appendChild(card);
 });
 
-socket.on('showdown', (table) => {
-    let winner = determineWinner(table.players, table.deck);
+socket.on('showdown', (winner) => {
     console.log('Winner:', winner);
-
 });
-
-function determineWinner(players, tableDeck) {
-let winner = null;
-let highestHand = null;
-
-console.log(players);
-
-// Déclaration des tableaux pour les mains de chaque joueur
-let handP1 = players[0].deck.concat(tableDeck);
-let handP2 = players[1].deck.concat(tableDeck);
-
-// Convertir les cartes de chaque main en format 'numéroCouleur'
-const convertedHands = [handP1, handP2].map(hand => {
-    return hand.map(card => {
-        const number = card.number === 'J' ? 'J' : card.number.toString();
-        return number + card.color;
-    });
-});
-
-// Affichage des mains converties dans la console
-console.log(convertedHands);
-
-var hand1 = Hand.solve(convertedHands[0]);
-var hand2 = Hand.solve(convertedHands[1]);
-var winnerHand = Hand.winners([hand1, hand2]);
-
-console.log(winnerHand);
-
-return winner;
-}
-
 
 
 let fold = () => {
@@ -149,6 +129,12 @@ socket.on('acceptAction', (userId, action, table) => {
 socket.on('noCheck', () => {
     console.log('Opponent has bet, you can\'t check');
     document.getElementById('checkButton').disabled = true;
+    document.getElementById('callButton').disabled = false;
+});
+
+socket.on('noCall', () => {
+    console.log('Opponent has check, you can\'t call');
+    document.getElementById('callButton').disabled = true;
 });
 
 
@@ -164,21 +150,30 @@ function ableButtons(){
     document.getElementById('betButton').disabled = false;
     document.getElementById('checkButton').disabled = false;
     document.getElementById('callButton').disabled = false;
+
+    if(player.bet === -1 || player.bet === 0){
+        document.querySelector('#callButton').disabled = true;
+    }
 }
 
 function updateInfo(table){
     player = table.players.find(player => player.id === userId);
     opponent = table.players.find(player => player.id !== userId);
 
-    document.querySelector('.opponent .name').innerText = opponent.name;
+    document.querySelector('.opponent .name').innerText = opponent.name + ' : ';
     document.querySelector('.opponent .bankRoll').innerText = opponent.bank;
 
-    document.querySelector('.player .name').innerText = player.name;
+    document.querySelector('.player .name').innerText = player.name + ' (You) : ';
     document.querySelector('.player .bankRoll').innerText = player.bank;
 
-    document.querySelector('.table .bankRoll').innerText = table.bank;
+    document.querySelector('.table .bankRoll').innerText = "Pot : " + table.bank;
 
-    document.querySelector('.nextBet').innerText = 'Next bet : ' + table.nextBet;
+    document.querySelector('#betButton').textContent = 'Bet ' + table.nextBet;
+    if(player.bet === -1 || player.bet === 0){
+        document.querySelector('#callButton').textContent = 'Call';
+    } else{
+        document.querySelector('#callButton').textContent = 'Call ' + opponent.bet;
+    }
 
     if(player.isTurn){
         ableButtons();
@@ -186,3 +181,17 @@ function updateInfo(table){
         disabledButtons();
     }
 }
+
+function deleteAllCards(){
+    document.querySelector('.cardPlayerContainer').innerHTML = '';
+    document.querySelector('.flop').innerHTML = '';
+    document.querySelector('.turn').innerHTML = '';
+    document.querySelector('.river').innerHTML = '';
+}
+
+
+
+socket.on('newGame', (table) => {
+    deleteAllCards();
+    updateInfo(table);
+});

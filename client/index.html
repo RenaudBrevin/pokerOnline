@@ -7,37 +7,39 @@
     <title>Document</title>
 </head>
 <body>
-    <button onclick="join('room1')">Room 1</button>
-    <button onclick="join('room2')">Room 2</button>
-
-    <div>
+    <div class="roomChoice">
+        <button onclick="join('room1')">Room 1</button>
+        <button onclick="join('room2')">Room 2</button>
+    </div>
+    <div class="tableContainer">
         <div class="opponent">
             <span class="name"></span>
             <span class="bankRoll"></span>
         </div>
         <div class="table">
-            <div class="conatinercard"></div>
+            <div class="containerCard">
+                <div class="flop"></div>
+                <div class="turn"></div>
+                <div class="river"></div>
+            </div>
             <span class="bankRoll"></span>
         </div>
-        <div class="containerCard">
-            <div class="flop"></div>
-            <div class="turn"></div>
-            <div class="river"></div>
-        </div>
         <div class="player">
-            <div class="card playerCard"></div>
+            <div class="cardPlayerContainer"></div>
+
             <span class="name"></span>
             <span class="bankRoll"></span>
         </div>
-        <span class="nextBet">Next bet : 50</span>
     </div>
 
     
 
-    <button onclick="fold()" id="foldButton" class="choiceButton">Fold</button>
-    <button onclick="bet()" id="betButton" class="choiceButton">Bet</button>
-    <button onclick="check()" id="checkButton" class="choiceButton">Check</button>
-    <button onclick="call()" id="callButton" class="choiceButton">Call</button>
+    <div class="actions">
+        <button onclick="fold()" id="foldButton" class="choiceButton" disabled>Fold</button>
+        <button onclick="bet()" id="betButton" class="choiceButton" disabled>Bet</button>
+        <button onclick="check()" id="checkButton" class="choiceButton" disabled>Check</button>
+        <button onclick="call()" id="callButton" class="choiceButton" disabled>Call</button>
+    </div>
 
 </body>
 <script src="https://cdn.jsdelivr.net/npm/pokersolver@2.1.4/pokersolver.min.js"></script>

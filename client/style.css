@@ -2,6 +2,43 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Roboto', sans-serif;
+    background-color: #0d280f;
+}
+
+button{
+    cursor: pointer;
+    background-color: #A41515;
+    padding: 8px 16px;
+    border: 1px white solid;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+}
+
+button:disabled{
+    cursor: not-allowed;
+    background-color: #444444;
+    color: black;
+}
+
+.roomChoice{
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.tableContainer{
 
 }
 
@@ -9,7 +46,7 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 32px;
+    gap: 16px;
 }
 
 .containerCard > div{
@@ -18,15 +55,78 @@
     align-items: center;
     gap: 16px;
     width: fit-content;
-    height: 200px;
 }
 
 .card{
-    width: 100px;
-    height: 200px;
-    border-radius: 10px;
+    background-color: white;
+    position: relative;
+    width: 120px;
+    aspect-ratio: 25/35;
+    border-radius: 16px;
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 32px;
+    border: 1px solid black;
+    color: black;
 }
+
+
+.cardPlayerContainer{
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+.player{
+    margin-top: 64px;
+}
+
+
+.S::before, .H::before, .D::before, .C::before, .S::after, .H::after, .D::after, .C::after{
+    position: absolute;
+    content: '';
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 24px;
+    height: 24px;
+}
+
+.S::before, .H::before, .D::before, .C::before{
+    bottom: 16px;
+    left: 16px;
+}
+
+.S::after, .H::after, .D::after, .C::after{
+    top: 16px;
+    right: 16px;
+}
+
+.S::before, .S::after{
+    background-image: url('assets/spade.svg');
+}
+
+.H::before, .H::after{
+    background-image: url('assets/heart.svg');
+}
+
+.D::before, .D::after{
+    background-image: url('assets/diamond.svg');
+}
+
+.C::before, .C::after{
+    background-image: url('assets/club.svg');
+}
+
+
+
+
+
+.actions{
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 16px;
+}
+
