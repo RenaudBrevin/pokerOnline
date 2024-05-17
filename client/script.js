@@ -45,7 +45,7 @@ socket.on('preFlop', (userDeck, table) => {
 
     let playerContainer = document.querySelector('.cardPlayerContainer');
 
-    console.log(playerContainer);
+    // console.log(playerContainer);
 
     let cardIndex = 0;
     for (let i = 0; i < 2; i++) {
@@ -122,7 +122,7 @@ let call = () => {
 };
 
 socket.on('acceptAction', (userId, action, table) => {
-    console.log(userId, action, table.bank);
+    // console.log(userId, action, table.bank);
     updateInfo(table);
 });
 
@@ -135,6 +135,18 @@ socket.on('noCheck', () => {
 socket.on('noCall', () => {
     console.log('Opponent has check, you can\'t call');
     document.getElementById('callButton').disabled = true;
+});
+
+socket.on('noBet', () => {
+    console.log('You don\'t have enough money to bet');
+    document.getElementById('betButton').disabled = true;
+});
+
+socket.on('allIn', () => {
+    console.log('You are all in');
+    let button = document.getElementById('betButton');
+    button.disabled = true;
+    button.textContent = 'All in';
 });
 
 
