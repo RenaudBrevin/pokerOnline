@@ -50,9 +50,9 @@ colors.forEach(color => {
     for(let i = 1; i < 14; i++){
         let j = i;
         let index = 0;
-        if(i > 10){
-            index = i - 11;
-            j = ['J', 'Q', 'K'][index];
+        if(i > 9){
+            index = i - 10;
+            j = ['T', 'J', 'Q', 'K'][index];
         } else if(i === 1){
             j = 'A';
         }
@@ -210,11 +210,18 @@ function showFlop(room){
     deck = deck.sort(() => Math.random() - 0.5);
     let card = "";
     
-    card = deck.shift();
-    player1.deck.push(card);
+    for(let i = 0; i < 2; i++){
+        card = deck.shift();
+        player1.deck.push(card);
+    }
 
-    card = deck.shift();
-    player2.deck.push(card);
+    for (let i = 0; i < 2; i++){
+        card = deck.shift();
+        player2.deck.push(card);
+    }
+
+
+
 
     for(let i = 0; i < 3; i++){
         card = deck.shift();
@@ -223,8 +230,8 @@ function showFlop(room){
 
     player1.isTurn = true;
 
-    io.to(id1).emit('flop', player1.deck[0], table);
-    io.to(id2).emit('flop', player2.deck[0], table);
+    io.to(id1).emit('flop', player1.deck, table);
+    io.to(id2).emit('flop', player2.deck, table);
 };
 
 
